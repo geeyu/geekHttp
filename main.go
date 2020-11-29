@@ -2,19 +2,22 @@ package main
 
 import (
 	"gee"
+	"log"
 	"net/http"
 )
 
 func main() {
 	r := gee.New()
 	r.Get("/", func(c *gee.Context) {
-		c.String(http.StatusOK, "URL.Path = %q\n", c.Path)
+		c.HTML(http.StatusOK, "<h1>hello geekHttp<h1>")
 	})
 
 	r.Get("/hello", func(c *gee.Context) {
-		for key, header := range c.Req.Header {
-			c.String(http.StatusOK, "Header[%q] = %q\n", key, header)
-		}
+		c.String(http.StatusOK, "hello %s, you're at %s\n", c.Query("name"), c.Path)
+	})
+
+	r.Get("/hello/:name", func(c *gee.Context) {
+		c.String(http.StatusOK, "hello %s, you're at %s\n", c.Param("name"), c.Path)
 	})
 
 	r.Post("/login", func(c *gee.Context) {
@@ -24,5 +27,9 @@ func main() {
 		})
 	})
 
-	r.Run(":9999")
+	r.Get("/assets/*filepath", func(c *gee.Context) {
+		c.Json(http.StatusOK, gee.H{"filepath": c.Param("filepath")})
+	})
+
+	log.Fatal(r.Run(":9999"))
 }
